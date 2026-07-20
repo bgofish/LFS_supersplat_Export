@@ -1,0 +1,161 @@
+<rml>
+<head>
+  <link type="text/rcss" href="main_panel.rcss"/>
+</head>
+<body class="ss-panel" data-model="supersplat_upload">
+  <div class="ss-topbar">
+    <div class="ss-topbar-brand">
+      <img class="ss-topbar-logo" src="supersplat-logo.tga" alt="SuperSplat" />
+      <div class="ss-topbar-copy">
+        <span class="ss-topbar-title">SuperSplat Upload</span>
+        <span class="ss-topbar-subtitle">by PlayCanvas</span>
+      </div>
+    </div>
+    <button type="button" class="ss-github-link" data-event-click="open_plugin_github">
+      <img class="ss-github-icon" src="github-mark.tga" alt="GitHub" />
+    </button>
+  </div>
+
+  <div class="ss-form-view" data-if="show_form">
+    <div class="ss-account" data-if="show_account">
+      <div class="ss-account-copy">
+        <div class="ss-account-line">
+          <span class="ss-status-dot"></span>
+          <span class="ss-account-title">{{account_title}}</span>
+        </div>
+        <span class="ss-muted ss-small">{{account_source}}</span>
+      </div>
+      <button type="button" class="ss-link" data-event-click="change_credentials">Change</button>
+    </div>
+
+    <div class="ss-card ss-credentials ss-credential-card" data-if="show_credentials">
+      <span class="ss-card-title">Connect to SuperSplat</span>
+      <div class="ss-credential-field-heading">
+        <span class="ss-credential-label">API key</span>
+        <button type="button" class="ss-link ss-api-help" data-event-click="open_api_key_help">How to add an API key</button>
+      </div>
+      <input type="password" class="ss-api-key" placeholder="API key" data-value="api_key_entry" />
+      <span class="ss-muted ss-credential-note">Your key is never included in upload manifests.</span>
+      <label class="ss-check-row">
+        <input type="checkbox" data-attrif-checked="remember_token" data-event-change="toggle_remember" />
+        <span>Store securely with your operating system</span>
+      </label>
+      <span class="ss-error ss-help" data-if="show_credentials_error">{{form_error}}</span>
+      <div class="ss-button-row">
+        <button type="button" class="btn btn--primary ss-grow" data-event-click="connect" data-attrif-disabled="!can_connect">Connect</button>
+        <button type="button" class="btn btn--secondary ss-grow" data-if="show_cancel_credentials" data-event-click="cancel_credentials">Cancel</button>
+      </div>
+      <button type="button" class="ss-link ss-forget" data-if="show_cancel_credentials" data-event-click="forget_key">Forget saved key</button>
+    </div>
+
+    <div class="ss-section">
+      <span class="ss-eyebrow">Scene</span>
+      <div class="ss-field-row">
+        <span class="ss-label">Content</span>
+        <select class="ss-grow" data-value="scope">
+          <option value="all">All splats</option>
+          <option value="visible">Visible splats</option>
+        </select>
+      </div>
+      <div class="ss-summary" data-class-warning="!selection_valid">
+        <span class="ss-summary-icon"></span>
+        <div class="ss-summary-copy ss-grow">
+          <span class="ss-summary-title">{{selection_title}}</span>
+          <span class="ss-muted ss-summary-meta" data-if="selection_valid">&#183;</span>
+          <span class="ss-muted ss-summary-meta">{{selection_note}}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ss-section">
+      <span class="ss-eyebrow">Details</span>
+      <div class="ss-field-row">
+        <span class="ss-label">Title</span>
+        <input class="ss-grow" type="text" placeholder="Scene title" data-value="title" />
+      </div>
+      <div class="ss-field-row">
+        <span class="ss-label">Description</span>
+        <input class="ss-grow" type="text" placeholder="Optional" data-value="description" />
+      </div>
+    </div>
+
+    <button type="button" class="ss-advanced-toggle" data-event-click="toggle_advanced">
+      <span class="ss-marker">{{advanced_marker}}</span><span>Advanced</span>
+    </button>
+    <div class="ss-advanced" data-if="advanced_open">
+      <div class="ss-field-row">
+        <span class="ss-label">Format</span>
+        <select class="ss-grow" data-value="source_format">
+          <option value="ply">PLY</option>
+          <option value="sog">SOG</option>
+        </select>
+      </div>
+      <div class="ss-field-row">
+        <span class="ss-label">SH degree</span>
+        <select class="ss-grow" data-value="sh_degree">
+          <option value="0">RGB only</option>
+          <option value="1">Degree 1</option>
+          <option value="2">Degree 2</option>
+          <option value="3">Full / Degree 3</option>
+        </select>
+      </div>
+      <div class="ss-field-row">
+        <span class="ss-label">Parallel parts</span>
+        <select class="ss-grow" data-value="concurrency">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="4">4</option>
+          <option value="6">6</option>
+          <option value="8">8</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="ss-card ss-resume" data-if="show_resume">
+      <span class="ss-card-title">Resumable upload</span>
+      <span class="ss-muted ss-small">{{resume_title}} - {{resume_size}} staged locally</span>
+      <div class="ss-button-row">
+        <button type="button" class="btn btn--primary ss-grow" data-event-click="resume_upload">Resume</button>
+        <button type="button" class="btn btn--secondary ss-grow" data-event-click="discard_resume">Discard</button>
+      </div>
+    </div>
+
+    <span class="ss-error ss-form-error" data-if="show_upload_error">{{form_error}}</span>
+    <button type="button" class="btn btn--primary ss-primary" data-event-click="start_upload" data-attrif-disabled="!can_upload">Upload to SuperSplat</button>
+    <span class="ss-muted ss-footnote">Uploads are unlisted by default</span>
+  </div>
+
+  <div class="ss-state-view" data-if="show_progress">
+    <span class="ss-state-heading">{{progress_heading}}</span>
+    <span class="ss-muted ss-state-copy">{{success_title}}</span>
+    <div class="ss-card ss-progress-card">
+      <div class="ss-progress-meta">
+        <span>{{progress_status}}</span>
+        <span class="ss-strong">{{progress_pct}}</span>
+      </div>
+      <progress class="ss-progress" max="1" data-attr-value="progress_value" />
+      <span class="ss-muted ss-small">{{progress_detail}}</span>
+    </div>
+    <div class="ss-state-actions">
+      <button type="button" class="btn btn--secondary ss-primary" data-event-click="cancel_upload">Cancel upload</button>
+    </div>
+  </div>
+
+  <div class="ss-state-view" data-if="show_success">
+    <span class="ss-state-heading">Upload complete</span>
+    <span class="ss-muted ss-state-copy">Your scene is now processing in SuperSplat.</span>
+    <div class="ss-card ss-success-card">
+      <span class="ss-card-title">{{success_title}}</span>
+      <span class="ss-muted ss-small">{{success_metadata}}</span>
+    </div>
+    <div class="ss-state-actions">
+      <button type="button" class="btn btn--primary ss-primary" data-if="has_edit_url" data-event-click="open_editor">Continue in SuperSplat</button>
+      <button type="button" class="btn btn--secondary ss-primary ss-secondary-action" data-if="has_viewer_url" data-event-click="open_viewer">Open viewer</button>
+      <div class="ss-tertiary-actions">
+        <button type="button" class="ss-link" data-event-click="copy_link">Copy link</button>
+        <button type="button" class="ss-link" data-event-click="upload_another">Upload another scene</button>
+      </div>
+    </div>
+  </div>
+</body>
+</rml>

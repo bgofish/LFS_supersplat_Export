@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SuperSplat panel prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, "Segoe UI", system-ui, sans-serif;
+      --page: #151820;
+      --shell: #1b1f27;
+      --panel: #20242d;
+      --panel-raised: #262b35;
+      --field: #1b1f27;
+      --border: #3b4351;
+      --border-soft: #303642;
+      --text: #eef2f7;
+      --muted: #9da7b7;
+      --blue: #55a2f2;
+      --blue-hover: #68b0fa;
+      --green: #57d69a;
+      --amber: #f1bd62;
+      --red: #ff7575;
+      --radius: 5px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 10%, rgba(72, 91, 125, .18), transparent 36rem),
+        var(--page);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .prototype {
+      display: grid;
+      grid-template-columns: minmax(330px, 360px) 190px;
+      gap: 22px;
+      align-items: start;
+      padding: 30px;
+    }
+
+    .window {
+      overflow: hidden;
+      border: 1px solid #303744;
+      border-radius: 7px;
+      background: var(--shell);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .4);
+    }
+
+    .tabs {
+      display: flex;
+      height: 33px;
+      border-bottom: 1px solid #303744;
+      background: #252a34;
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 15px;
+      color: #9da6b5;
+      border-right: 1px solid #303744;
+      font-size: 12px;
+    }
+
+    .tab.active {
+      color: var(--text);
+      background: var(--panel);
+    }
+
+    .tab-close { color: #8490a1; }
+
+    .panel {
+      min-height: 500px;
+      padding: 17px 16px 15px;
+      background: var(--panel);
+    }
+
+    [hidden] { display: none !important; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      min-height: 41px;
+      margin-bottom: 14px;
+      padding: 0 2px 10px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .topbar-brand {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .topbar-logo {
+      width: 26px;
+      height: 26px;
+      flex: 0 0 auto;
+    }
+
+    .topbar-copy { min-width: 0; }
+    .topbar-title { display: block; font-weight: 650; }
+    .topbar-subtitle { display: block; margin-top: 1px; color: var(--muted); font-size: 10px; }
+
+    .github-link {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      flex: 0 0 auto;
+      place-items: center;
+      margin-left: auto;
+      border: 1px solid transparent;
+      border-radius: 4px;
+    }
+
+    .github-link:hover {
+      border-color: var(--border);
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .github-link img { width: 18px; height: 18px; filter: invert(1); opacity: .7; }
+    .github-link:hover img { opacity: 1; }
+
+    .account-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 32px;
+      padding-bottom: 13px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .account-status {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .account-copy { min-width: 0; }
+    .account-name {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 600;
+    }
+    .account-source {
+      margin-top: 2px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .link-button {
+      border: 0;
+      padding: 4px 0;
+      color: var(--blue);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .link-button:hover { color: var(--blue-hover); }
+
+    .section { padding-top: 17px; }
+
+    .eyebrow {
+      margin: 0 0 11px;
+      color: #aeb8c7;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .105em;
+      text-transform: uppercase;
+    }
+
+    .field { margin-bottom: 12px; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr);
+      gap: 11px;
+      align-items: center;
+      margin-bottom: 9px;
+    }
+
+    label, .field-label { color: #c7cfda; }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      outline: none;
+      color: var(--text);
+      background: var(--field);
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input, select { height: 30px; padding: 0 9px; }
+    textarea { min-height: 54px; padding: 7px 9px; resize: vertical; }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(85, 162, 242, .15);
+    }
+
+    select {
+      appearance: none;
+      padding-right: 27px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #9ba7b8 50%),
+        linear-gradient(135deg, #9ba7b8 50%, transparent 50%);
+      background-position: calc(100% - 14px) 12px, calc(100% - 9px) 12px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+
+    .scene-summary {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 36px;
+      margin-top: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .018);
+    }
+
+    .scene-summary.warning {
+      border-color: rgba(241, 189, 98, .28);
+      background: rgba(241, 189, 98, .035);
+    }
+
+    .summary-icon {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .warning .summary-icon {
+      background: var(--amber);
+    }
+
+    .summary-copy {
+      min-width: 0;
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .summary-title { font-weight: 600; }
+    .summary-separator, .summary-note { color: var(--muted); font-size: 11px; }
+
+    details {
+      margin: 2px 0 15px;
+      border-top: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    summary {
+      position: relative;
+      padding: 11px 3px 11px 20px;
+      color: #c9d1dc;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+    summary::before {
+      content: "›";
+      position: absolute;
+      left: 4px;
+      top: 9px;
+      color: #8995a5;
+      font-size: 17px;
+      transform-origin: center;
+      transition: transform .14s;
+    }
+
+    details[open] summary::before { transform: rotate(90deg); }
+
+    .advanced-grid { padding: 2px 3px 7px; }
+
+    .primary, .secondary {
+      width: 100%;
+      height: 30px;
+      min-height: 30px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .primary {
+      border: 1px solid #5ba6ef;
+      color: white;
+      background: #447fbd;
+      font-weight: 600;
+    }
+
+    .primary:hover:not(:disabled) { background: #4d8dce; }
+
+    .primary:disabled {
+      border-color: #3c4653;
+      color: #798493;
+      background: #2c333e;
+      cursor: not-allowed;
+    }
+
+    .secondary {
+      border: 1px solid var(--border);
+      color: #d9e0e9;
+      background: #292f39;
+    }
+
+    .secondary:hover { background: #313844; }
+
+    .footnote {
+      margin: 9px 0 0;
+      color: #8f9aaa;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .credential-card {
+      padding: 13px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .018);
+    }
+
+    .credential-card h2 { margin: 0 0 11px; font-size: 13px; }
+
+    .credential-field-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+
+    .credential-label { font-size: 12px; font-weight: 600; }
+    .credential-help { flex: 0 0 auto; padding: 2px 0; font-size: 11px; }
+    .credential-card .field { margin-bottom: 0; }
+
+    .credential-note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .credential-error,
+    .form-error {
+      color: var(--red);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .credential-error { display: block; margin: 0 0 8px; }
+    .form-error { margin: 10px 0 6px; }
+    .credential-error[hidden], .form-error[hidden] { display: none; }
+
+    .resume-card {
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius);
+      background: var(--panel-raised);
+    }
+
+    .resume-card strong { display: block; margin-bottom: 3px; }
+    .resume-card span { color: var(--muted); font-size: 11px; }
+    .resume-card .button-row { margin-top: 9px; }
+
+    .api-key {
+      height: 30px;
+      padding: 0 9px;
+      border-color: var(--border);
+      background: var(--field);
+    }
+
+    .api-key:focus { background: var(--field); }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 9px 0 11px;
+      color: #cdd5df;
+      font-size: 12px;
+    }
+
+    .check-row input { width: 15px; height: 15px; margin: 0; accent-color: var(--blue); }
+
+    .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .state-view {
+      min-height: 455px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .state-heading {
+      margin: 5px 0 7px;
+      font-size: 16px;
+      font-weight: 650;
+    }
+
+    .state-copy { margin: 0; color: var(--muted); line-height: 1.45; }
+
+    .progress-wrap {
+      margin-top: 26px;
+      padding: 14px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius);
+      background: var(--panel-raised);
+    }
+
+    .progress-meta { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .progress-track { height: 6px; overflow: hidden; border-radius: 99px; background: #151922; }
+    .progress-fill { width: 38%; height: 100%; border-radius: inherit; background: var(--blue); transition: width .25s; }
+    .progress-detail { margin-top: 9px; color: var(--muted); font-size: 11px; }
+    .state-actions { margin-top: 28px; }
+    .secondary-action { margin-top: 7px; }
+
+    .tertiary-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 14px;
+    }
+
+    .success-card {
+      margin-top: 19px;
+      padding: 12px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius);
+      background: var(--panel-raised);
+    }
+
+    .success-card strong { display: block; margin-bottom: 4px; }
+    .success-card span { color: var(--muted); font-size: 11px; }
+
+    .demo-panel {
+      padding-top: 8px;
+      color: var(--muted);
+    }
+
+    .demo-panel h1 { margin: 0 0 5px; color: var(--text); font-size: 14px; }
+    .demo-panel p { margin: 0 0 14px; font-size: 11px; line-height: 1.45; }
+
+    .demo-switcher {
+      display: grid;
+      gap: 6px;
+    }
+
+    .demo-switcher button {
+      min-height: 31px;
+      padding: 0 10px;
+      border: 1px solid #343c49;
+      border-radius: 4px;
+      color: #b8c1ce;
+      background: #1e232c;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .demo-switcher button.active {
+      border-color: rgba(85, 162, 242, .65);
+      color: #e8f3ff;
+      background: rgba(85, 162, 242, .14);
+    }
+
+    .demo-note {
+      margin-top: 15px;
+      padding-top: 13px;
+      border-top: 1px solid #2b313c;
+    }
+
+    @media (max-width: 650px) {
+      body { place-items: start center; }
+      .prototype { grid-template-columns: minmax(300px, 360px); padding: 16px; }
+      .demo-panel { order: -1; }
+      .demo-switcher { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="prototype">
+    <section class="window" aria-label="LichtFeld SuperSplat panel prototype">
+      <nav class="tabs" aria-label="Panel tabs">
+        <span class="tab">Rendering</span>
+        <span class="tab">Training</span>
+        <span class="tab active">SuperSplat <span class="tab-close">×</span></span>
+      </nav>
+
+      <div class="panel">
+        <header class="topbar">
+          <div class="topbar-brand">
+            <img class="topbar-logo" src="assets/supersplat-logo.svg" alt="SuperSplat">
+            <div class="topbar-copy">
+              <span class="topbar-title">SuperSplat Upload</span>
+              <span class="topbar-subtitle">by PlayCanvas</span>
+            </div>
+          </div>
+          <a class="github-link" href="https://github.com/playcanvas/supersplat-lichtfeld-plugin" target="_blank" rel="noreferrer" aria-label="View SuperSplat upload plugin on GitHub" title="View on GitHub">
+            <img src="assets/github-mark.svg" alt="">
+          </a>
+        </header>
+
+        <div class="view" id="form-view">
+          <div class="account-row" id="account-row">
+            <div class="account-status">
+              <div class="account-copy">
+                <div class="account-name"><span class="status-dot" aria-hidden="true"></span>Connected to SuperSplat</div>
+                <div class="account-source">API key from environment</div>
+              </div>
+            </div>
+            <button class="link-button" id="change-key" type="button">Change</button>
+          </div>
+
+          <div class="credential-card" id="credential-card" hidden>
+            <h2>Connect to SuperSplat</h2>
+            <div class="credential-field-heading">
+              <label class="credential-label" for="api-key">API key</label>
+              <a class="link-button credential-help" href="https://developer.playcanvas.com/user-manual/supersplat/integrations/lichtfeld-studio/#connect-to-supersplat" target="_blank" rel="noreferrer">How to add an API key</a>
+            </div>
+            <div class="field"><input class="api-key" id="api-key" type="password" placeholder="API key" aria-label="SuperSplat API key"></div>
+            <p class="credential-note">Your key is never included in upload manifests.</p>
+            <label class="check-row"><input type="checkbox" checked> Store securely with your operating system</label>
+            <span class="credential-error" id="credential-error" role="alert" hidden>The API key was rejected by SuperSplat. Check the key and try again.</span>
+            <div class="button-row">
+              <button class="primary" id="connect-key" type="button">Connect</button>
+              <button class="secondary" id="cancel-key" type="button">Cancel</button>
+            </div>
+          </div>
+
+          <section class="section">
+            <h2 class="eyebrow">Scene</h2>
+            <div class="field-row">
+              <label for="scene-content">Content</label>
+              <select id="scene-content">
+                <option value="all">All splats</option>
+                <option value="visible">Visible splats</option>
+              </select>
+            </div>
+
+            <div class="scene-summary" id="scene-summary" role="status">
+              <span class="summary-icon" aria-hidden="true"></span>
+              <div class="summary-copy">
+                <span class="summary-title" id="summary-title">12 splat nodes ready</span>
+                <span class="summary-separator" aria-hidden="true">·</span>
+                <span class="summary-note" id="summary-note">7,104,223 Gaussians</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2 class="eyebrow">Details</h2>
+            <div class="field-row">
+              <label for="title">Title</label>
+              <input id="title" value="LichtFeld scene" autocomplete="off">
+            </div>
+            <div class="field-row">
+              <label for="description">Description</label>
+              <input id="description" placeholder="Optional" autocomplete="off">
+            </div>
+          </section>
+
+          <details>
+            <summary>Advanced</summary>
+            <div class="advanced-grid">
+              <div class="field-row">
+                <label for="format">Format</label>
+                <select id="format"><option>PLY</option><option>SOG</option></select>
+              </div>
+              <div class="field-row">
+                <label for="sh-degree">SH degree</label>
+                <select id="sh-degree">
+                  <option>RGB only</option><option>Degree 1</option><option selected>Degree 2</option><option>Full / Degree 3</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <label for="parallel">Parallel parts</label>
+                <select id="parallel"><option>1</option><option>2</option><option selected>4</option><option>6</option><option>8</option></select>
+              </div>
+            </div>
+          </details>
+
+          <div class="resume-card" id="resume-card" hidden>
+            <strong>Resumable upload</strong>
+            <span>LichtFeld scene · 374 MB staged locally</span>
+            <div class="button-row">
+              <button class="primary" type="button">Resume</button>
+              <button class="secondary" type="button">Discard</button>
+            </div>
+          </div>
+          <p class="form-error" id="upload-error" role="alert" hidden>Upload failed because SuperSplat rejected part 3 after multiple attempts.</p>
+          <button class="primary" id="upload" type="button">Upload to SuperSplat</button>
+          <p class="footnote">Uploads are unlisted by default</p>
+        </div>
+
+        <div class="view state-view" id="upload-view" hidden>
+          <h2 class="state-heading" id="upload-phase">Exporting scene</h2>
+          <p class="state-copy">LichtFeld scene</p>
+          <div class="progress-wrap">
+            <div class="progress-meta"><span id="progress-label">Preparing PLY</span><strong id="progress-percent">38%</strong></div>
+            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+            <div class="progress-detail" id="progress-detail">142 MB of 374 MB · 48 MB/s · 5s remaining</div>
+          </div>
+          <div class="state-actions"><button class="secondary" id="cancel-upload" type="button">Cancel upload</button></div>
+        </div>
+
+        <div class="view state-view" id="success-view" hidden>
+          <h2 class="state-heading">Upload complete</h2>
+          <p class="state-copy">Your scene is now processing in SuperSplat.</p>
+          <div class="success-card"><strong>LichtFeld scene</strong><span>SOG · 1,842,306 Gaussians</span></div>
+          <div class="state-actions">
+            <button class="primary" type="button">Continue in SuperSplat</button>
+            <button class="secondary secondary-action" type="button">Open viewer</button>
+            <div class="tertiary-actions">
+              <button class="link-button" id="copy-link" type="button">Copy link</button>
+              <button class="link-button" id="upload-another" type="button">Upload another scene</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="demo-panel">
+      <h1>Interactive prototype</h1>
+      <p>Switch states to review the complete panel flow. Controls inside the panel are also interactive.</p>
+      <div class="demo-switcher" aria-label="Prototype state">
+        <button data-state="connect" type="button">Connect</button>
+        <button data-state="credential-error" type="button">Key error</button>
+        <button class="active" data-state="ready" type="button">Ready</button>
+        <button data-state="empty" type="button">No splats</button>
+        <button data-state="upload-error" type="button">Upload error</button>
+        <button data-state="exporting" type="button">Exporting</button>
+        <button data-state="uploading" type="button">Uploading</button>
+        <button data-state="success" type="button">Complete</button>
+      </div>
+      <p class="demo-note">The state switcher is prototype-only and would not appear in LichtFeld.</p>
+    </aside>
+  </main>
+
+  <script>
+    const formView = document.querySelector('#form-view');
+    const uploadView = document.querySelector('#upload-view');
+    const successView = document.querySelector('#success-view');
+    const uploadButton = document.querySelector('#upload');
+    const summary = document.querySelector('#scene-summary');
+    const summaryTitle = document.querySelector('#summary-title');
+    const summaryNote = document.querySelector('#summary-note');
+    const sceneContent = document.querySelector('#scene-content');
+    const credentialError = document.querySelector('#credential-error');
+    const uploadError = document.querySelector('#upload-error');
+    const resumeCard = document.querySelector('#resume-card');
+    const apiKeyInput = document.querySelector('#api-key');
+    const connectButton = document.querySelector('#connect-key');
+    const demoButtons = [...document.querySelectorAll('[data-state]')];
+    let demoState = 'ready';
+    let progressTimer = null;
+
+    const sceneData = {
+      all: ['12 scene splats ready', '7,104,223 Gaussians'],
+      visible: ['8 visible splats ready', '4,921,814 Gaussians']
+    };
+
+    function stopProgress() {
+      if (progressTimer) window.clearInterval(progressTimer);
+      progressTimer = null;
+    }
+
+    function setActiveStateButton(state) {
+      demoButtons.forEach(button => button.classList.toggle('active', button.dataset.state === state));
+    }
+
+    function renderSceneValidation() {
+      const empty = demoState === 'empty';
+      summary.classList.toggle('warning', empty);
+      if (empty) {
+        summaryTitle.textContent = sceneContent.value === 'visible' ? 'No visible splats' : 'No splats in scene';
+        summaryNote.textContent = 'Open a splat scene or choose another content scope.';
+      } else {
+        [summaryTitle.textContent, summaryNote.textContent] = sceneData[sceneContent.value];
+      }
+      uploadButton.disabled = empty;
+    }
+
+    function syncConnectButton() {
+      connectButton.disabled = apiKeyInput.value.trim().length === 0;
+    }
+
+    function showState(state) {
+      stopProgress();
+      demoState = state;
+      const progressState = state === 'exporting' || state === 'uploading';
+      formView.hidden = progressState || state === 'success';
+      uploadView.hidden = !progressState;
+      successView.hidden = state !== 'success';
+      credentialError.hidden = true;
+      uploadError.hidden = true;
+      resumeCard.hidden = true;
+      setActiveStateButton(state);
+      if (state === 'connect' || state === 'credential-error') {
+        document.querySelector('#account-row').hidden = true;
+        document.querySelector('#credential-card').hidden = false;
+        credentialError.hidden = state !== 'credential-error';
+        syncConnectButton();
+      }
+      if (state === 'ready' || state === 'empty' || state === 'upload-error') {
+        document.querySelector('#account-row').hidden = false;
+        document.querySelector('#credential-card').hidden = true;
+        renderSceneValidation();
+        uploadError.hidden = state !== 'upload-error';
+        resumeCard.hidden = state !== 'upload-error';
+      }
+      if (state === 'exporting') setProgress(45, 'export');
+      if (state === 'uploading') setProgress(45, 'upload');
+    }
+
+    function setProgress(value, phase) {
+      const safeValue = Math.max(0, Math.min(100, value));
+      const exporting = phase === 'export';
+      document.querySelector('#progress-fill').style.width = safeValue + '%';
+      document.querySelector('#progress-percent').textContent = safeValue + '%';
+      document.querySelector('#upload-phase').textContent = exporting ? 'Exporting scene' : 'Uploading scene';
+      document.querySelector('#progress-label').textContent = exporting
+        ? 'Exporting 1 splat node to SOG…'
+        : 'Uploading 3 of 7 parts…';
+      if (exporting) {
+        document.querySelector('#progress-detail').textContent = 'Colors k-means';
+      } else {
+        const uploaded = Math.round(374 * safeValue / 100);
+        document.querySelector('#progress-detail').textContent = `${uploaded} MB of 374 MB · 48 MB/s · ${Math.max(0, Math.ceil((100 - safeValue) / 8))}s remaining`;
+      }
+    }
+
+    demoButtons.forEach(button => button.addEventListener('click', () => showState(button.dataset.state)));
+    sceneContent.addEventListener('change', renderSceneValidation);
+    apiKeyInput.addEventListener('input', syncConnectButton);
+
+    document.querySelector('#change-key').addEventListener('click', () => {
+      showState('connect');
+      apiKeyInput.focus();
+    });
+
+    function closeCredentialEditor() {
+      apiKeyInput.value = '';
+      syncConnectButton();
+      showState('ready');
+    }
+
+    connectButton.addEventListener('click', closeCredentialEditor);
+    document.querySelector('#cancel-key').addEventListener('click', closeCredentialEditor);
+
+    uploadButton.addEventListener('click', () => {
+      showState('exporting');
+      let value = 4;
+      let phase = 'export';
+      setProgress(value, phase);
+      progressTimer = window.setInterval(() => {
+        value += Math.ceil(Math.random() * 7);
+        if (phase === 'export' && value >= 35) {
+          phase = 'upload';
+          value = 4;
+          setActiveStateButton('uploading');
+        }
+        setProgress(value, phase);
+        if (value >= 100) {
+          stopProgress();
+          window.setTimeout(() => showState('success'), 250);
+        }
+      }, 350);
+    });
+
+    document.querySelector('#cancel-upload').addEventListener('click', () => showState('ready'));
+    document.querySelector('#upload-another').addEventListener('click', () => showState('ready'));
+    document.querySelector('#copy-link').addEventListener('click', event => {
+      event.currentTarget.textContent = 'Copied';
+      window.setTimeout(() => { event.currentTarget.textContent = 'Copy link'; }, 900);
+    });
+  </script>
+</body>
+</html>
