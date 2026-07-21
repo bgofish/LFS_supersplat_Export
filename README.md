@@ -26,26 +26,34 @@ See the [LichtFeld Studio integration guide](https://developer.playcanvas.com/us
 
 The plugin has no required third-party Python dependencies. Secure persistent credential storage uses the host `keyring` package when available, with Windows DPAPI as a fallback on Windows.
 
-## Installation
+## Installation (LichtFeld Studio v0.5.3+)
 
-Copy this repository into LichtFeld Studio's plugin directory using the folder name `supersplat`:
+In LichtFeld Studio:
 
-| Platform | Destination |
-| --- | --- |
-| Windows | `%USERPROFILE%\.lichtfeld\plugins\supersplat` |
-| Linux | `~/.lichtfeld/plugins/supersplat` |
-
-Discover, enable, and load the plugin from LichtFeld Studio's Python Console:
-
-```python
-import lichtfeld as lf
-
-lf.plugins.discover()
-lf.plugins.settings("supersplat").set("load_on_startup", True)
-lf.plugins.load("supersplat")
-```
+1. Open the **Plugin Marketplace** from the puzzle-piece icon.
+2. Enter `https://github.com/playcanvas/supersplat-lichtfeld-plugin`.
+3. Select **Install**.
+4. Select **Load** if the plugin is not activated automatically. Optionally enable **Load on Startup**.
 
 The **SuperSplat** tab should now appear in the main workspace.
+
+### Manual installation
+
+Clone the repository directly into LichtFeld Studio's plugin directory using the folder name `supersplat`.
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/playcanvas/supersplat-lichtfeld-plugin.git "$HOME\.lichtfeld\plugins\supersplat"
+```
+
+Linux:
+
+```bash
+git clone https://github.com/playcanvas/supersplat-lichtfeld-plugin.git ~/.lichtfeld/plugins/supersplat
+```
+
+Restart LichtFeld Studio, then load **SuperSplat** from the Plugin Marketplace.
 
 ## Uploading a scene
 
