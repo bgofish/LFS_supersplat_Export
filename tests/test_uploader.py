@@ -8,7 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from unittest.mock import patch
 
-from supersplat.errors import ApiError, ProtocolError
+from supersplat.errors import ApiError, ConfigurationError, ProtocolError
 from supersplat.models import JobStatus, UploadJob, UploadedPart, utc_now
 from supersplat.package_info import PLUGIN_VERSION, UPLOAD_CLIENT_ID, USER_AGENT
 from supersplat.uploader import UploadCallbacks, UploadEngine, merge_parts, part_size_for
@@ -300,6 +300,33 @@ class UploadEngineTests(unittest.TestCase):
             )
             final = fake.state.completed["parts"]  # type: ignore[index]
             self.assertEqual(final[0]["etag"], '"server-etag"')
+
+    def test_resume_rejects_different_account_before_updating_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as directory, _FakeServer() as fake:
+            path = Path(directory) / "scene.ply"
+            path.write_bytes(b"abcdefghijkl")
+            job = _job(path, fake.base_url, upload_id="up-1")
+            job.account_id = "acct-original"
+            accounts: list[dict] = []
+
+            def update_account(account: dict) -> None:
+                accounts.append(account)
+                job.account_id = account["id"]
+
+            with self.assertRaisesRegex(
+                ConfigurationError, "different SuperSplat account"
+            ):
+                UploadEngine(retries=0, allow_http=True).upload(
+                    job,
+                    "secret",
+                    threading.Event(),
+                    UploadCallbacks(on_account=update_account),
+                )
+
+            self.assertEqual(job.account_id, "acct-original")
+            self.assertEqual(accounts, [])
+            self.assertEqual(fake.state.create_count, 0)
+            self.assertEqual(fake.state.puts, {})
 
     def test_terminal_upload_session_recovers_existing_result(self) -> None:
         for status in ("processing", "completed"):

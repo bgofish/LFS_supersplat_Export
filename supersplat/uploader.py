@@ -76,11 +76,11 @@ class UploadEngine:
         callbacks.on_stage("Authenticating with SuperSplat...")
         account = self._retry(client.get_me, cancel_event)
         account_id = _required_string(account, "id", "account")
-        callbacks.on_account(account)
         if job.account_id and job.account_id != account_id:
             raise ConfigurationError(
                 "This upload was started with a different SuperSplat account."
             )
+        callbacks.on_account(account)
 
         session, expected_upload_id = self._get_or_create_session(
             client, job, file_size, cancel_event, callbacks
