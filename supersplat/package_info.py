@@ -6,7 +6,7 @@ import re
 from importlib.metadata import PackageNotFoundError, version as distribution_version
 from pathlib import Path
 
-DISTRIBUTION_NAME = "lfs_supersplat"
+DISTRIBUTION_NAME = "supersplat"
 UPLOAD_CLIENT_ID = "supersplat-lichtfeld-plugin"
 SOFTWARE_TOOLS = ("lichtfeld-studio",)
 

@@ -12,7 +12,7 @@ from .models import JobStatus, UploadJob
 
 
 def default_cache_root() -> Path:
-    override = os.environ.get("LFS_SUPERSPLAT_CACHE_DIR")
+    override = os.environ.get("SUPERSPLAT_CACHE_DIR")
     if override:
         return Path(override).expanduser()
 

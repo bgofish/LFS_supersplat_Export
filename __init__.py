@@ -3,10 +3,10 @@
 import lichtfeld as lf
 from lfs_plugins.ui import RuntimeState
 
-from .lfs_supersplat.runtime import start_controller, stop_controller
+from .supersplat.runtime import start_controller, stop_controller
 from .panels.main_panel import SuperSplatPanel
 
-_PLUGIN_NAME = "lfs_supersplat"
+_PLUGIN_NAME = "supersplat"
 _CLASSES = [SuperSplatPanel]
 __lfs_panel_classes__ = ["SuperSplatPanel"]
 __lfs_panel_ids__ = [SuperSplatPanel.id]

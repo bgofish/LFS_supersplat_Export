@@ -48,7 +48,7 @@ class PluginController:
         self.runtime_state = runtime_state
         self.adapter = LfsExportAdapter(lf, runtime_state)
         self.store = store or JobStore()
-        self.settings = lf.plugins.settings("lfs_supersplat")
+        self.settings = lf.plugins.settings("supersplat")
         self._lock = threading.RLock()
         self._state = ControllerState()
         self._job: UploadJob | None = None
@@ -188,7 +188,7 @@ class PluginController:
             description=description.strip(),
             node_names=selection.node_names,
             sh_degree=actual_sh_degree,
-            idempotency_key=f"lfs-supersplat-{idempotency}",
+            idempotency_key=f"supersplat-{idempotency}",
             base_url=self.base_url,
         )
         # Runtime-only attributes are deliberately excluded from the JSON manifest.

@@ -1,11 +1,11 @@
-# SuperSplat Upload for LichtFeld Studio
+# SuperSplat for LichtFeld Studio
 
 Upload Gaussian splat scenes from [LichtFeld Studio](https://lichtfeld.io/) directly to SuperSplat. The plugin uses LichtFeld's native exporter, stages a PLY or SOG file locally, and sends it to SuperSplat with progress reporting and resumable multipart uploads.
 
 See the [LichtFeld Studio integration guide](https://developer.playcanvas.com/user-manual/supersplat/integrations/lichtfeld-studio/) for the canonical installation and usage instructions.
 
 <p align="center">
-  <img src="docs/images/supersplat-upload-panel.png" alt="SuperSplat Upload panel in LichtFeld Studio" width="338">
+  <img src="docs/images/supersplat-upload-panel.png" alt="SuperSplat panel in LichtFeld Studio" width="338">
 </p>
 
 ## Features
@@ -28,12 +28,12 @@ The plugin has no required third-party Python dependencies. Secure persistent cr
 
 ## Installation
 
-Copy this repository into LichtFeld Studio's plugin directory using the folder name `lfs_supersplat`:
+Copy this repository into LichtFeld Studio's plugin directory using the folder name `supersplat`:
 
 | Platform | Destination |
 | --- | --- |
-| Windows | `%USERPROFILE%\.lichtfeld\plugins\lfs_supersplat` |
-| Linux | `~/.lichtfeld/plugins/lfs_supersplat` |
+| Windows | `%USERPROFILE%\.lichtfeld\plugins\supersplat` |
+| Linux | `~/.lichtfeld/plugins/supersplat` |
 
 Discover, enable, and load the plugin from LichtFeld Studio's Python Console:
 
@@ -41,8 +41,8 @@ Discover, enable, and load the plugin from LichtFeld Studio's Python Console:
 import lichtfeld as lf
 
 lf.plugins.discover()
-lf.plugins.settings("lfs_supersplat").set("load_on_startup", True)
-lf.plugins.load("lfs_supersplat")
+lf.plugins.settings("supersplat").set("load_on_startup", True)
+lf.plugins.load("supersplat")
 ```
 
 The **SuperSplat** tab should now appear in the main workspace.
@@ -80,7 +80,7 @@ The plugin also supports these environment and plugin settings:
 | --- | --- |
 | `SUPERSPLAT_API_KEY` | Supplies the API key at launch. |
 | `SUPERSPLAT_BASE_URL` | Overrides the default SuperSplat API base URL. |
-| `LFS_SUPERSPLAT_CACHE_DIR` | Moves staged exports and upload checkpoints. |
+| `SUPERSPLAT_CACHE_DIR` | Moves staged exports and upload checkpoints. |
 | `base_url` plugin setting | Overrides the API base URL through LichtFeld's plugin settings. |
 
 If both API URL overrides are configured, the `base_url` plugin setting takes precedence.
@@ -102,7 +102,7 @@ Windows PowerShell, from the repository root:
 ```powershell
 New-Item -ItemType Directory -Force -Path "$HOME\.lichtfeld\plugins" | Out-Null
 New-Item -ItemType Junction `
-  -Path "$HOME\.lichtfeld\plugins\lfs_supersplat" `
+  -Path "$HOME\.lichtfeld\plugins\supersplat" `
   -Target (Resolve-Path .)
 ```
 
@@ -110,7 +110,7 @@ Linux, from the repository root:
 
 ```bash
 mkdir -p ~/.lichtfeld/plugins
-ln -s "$(pwd)" ~/.lichtfeld/plugins/lfs_supersplat
+ln -s "$(pwd)" ~/.lichtfeld/plugins/supersplat
 ```
 
 Then enable the plugin and its watcher in LichtFeld's Python Console:
@@ -119,8 +119,8 @@ Then enable the plugin and its watcher in LichtFeld's Python Console:
 import lichtfeld as lf
 
 lf.plugins.discover()
-lf.plugins.settings("lfs_supersplat").set("load_on_startup", True)
-lf.plugins.load("lfs_supersplat")
+lf.plugins.settings("supersplat").set("load_on_startup", True)
+lf.plugins.load("supersplat")
 lf.plugins.start_watcher()
 ```
 
@@ -133,10 +133,10 @@ With `hot_reload = true` in `pyproject.toml`, saves to Python files reload the a
 You can also reload explicitly:
 
 ```python
-lf.plugins.reload("lfs_supersplat")
+lf.plugins.reload("supersplat")
 ```
 
-If reload fails, inspect `lf.plugins.get_error("lfs_supersplat")`. See the [LichtFeld plugin developer guide](https://lichtfeld.io/docs/guide/#hot-reload-debugging) for host-level debugging details.
+If reload fails, inspect `lf.plugins.get_error("supersplat")`. See the [LichtFeld plugin developer guide](https://lichtfeld.io/docs/guide/#hot-reload-debugging) for host-level debugging details.
 
 ## Tests
 

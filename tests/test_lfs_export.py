@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from lfs_supersplat.lfs_export import LfsExportAdapter
+from supersplat.lfs_export import LfsExportAdapter
 
 
 class _Splat:

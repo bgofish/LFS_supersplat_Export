@@ -22,6 +22,8 @@ class PanelContractTests(unittest.TestCase):
 
     def test_rml_is_well_formed_and_links_sibling_stylesheet(self) -> None:
         self.assertEqual(self.root.tag, "rml")
+        body = self.root.find("body")
+        self.assertEqual(body.attrib.get("data-model"), "supersplat")
         link = self.root.find("./head/link")
         self.assertIsNotNone(link)
         self.assertEqual(link.attrib["href"], "main_panel.rcss")
@@ -66,6 +68,7 @@ class PanelContractTests(unittest.TestCase):
     def test_upload_requires_valid_scene_and_credentials(self) -> None:
         upload = self.root.find(".//*[@data-event-click='start_upload']")
         self.assertIsNotNone(upload)
+        self.assertEqual(upload.text, "Upload to SuperSplat")
         self.assertEqual(upload.attrib.get("data-attrif-disabled"), "!can_upload")
         self.assertIn(
             "return state.token_configured and self._selection_valid and not state.active",
@@ -148,7 +151,7 @@ class PanelContractTests(unittest.TestCase):
         self.assertEqual(logo.attrib.get("alt"), "SuperSplat")
         self.assertEqual(
             brand.find("./div/span[@class='ss-topbar-title']").text,
-            "SuperSplat Upload",
+            "SuperSplat",
         )
         self.assertEqual(
             brand.find("./div/span[@class='ss-topbar-subtitle']").text,

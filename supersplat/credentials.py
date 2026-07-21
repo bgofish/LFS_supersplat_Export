@@ -9,7 +9,7 @@ from pathlib import Path
 
 from .storage import default_cache_root
 
-SERVICE = "lfs_supersplat"
+SERVICE = "supersplat"
 ACCOUNT = "api-key"
 
 

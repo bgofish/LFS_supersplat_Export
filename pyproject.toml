@@ -1,5 +1,5 @@
 [project]
-name = "lfs_supersplat"
+name = "supersplat"
 version = "0.1.1"
 description = "Upload LichtFeld Studio splat scenes to SuperSplat"
 authors = [{name = "PlayCanvas Ltd."}]

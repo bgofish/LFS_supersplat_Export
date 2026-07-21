@@ -4,8 +4,8 @@ import re
 import unittest
 from pathlib import Path
 
-import lfs_supersplat
-from lfs_supersplat.package_info import PLUGIN_VERSION, UPLOAD_CLIENT_ID, USER_AGENT
+import supersplat
+from supersplat.package_info import PLUGIN_VERSION, UPLOAD_CLIENT_ID, USER_AGENT
 
 
 class PackageInfoTests(unittest.TestCase):
@@ -17,7 +17,7 @@ class PackageInfoTests(unittest.TestCase):
         )
         self.assertIsNotNone(match)
         self.assertEqual(PLUGIN_VERSION, match.group(1))  # type: ignore[union-attr]
-        self.assertEqual(lfs_supersplat.__version__, PLUGIN_VERSION)
+        self.assertEqual(supersplat.__version__, PLUGIN_VERSION)
 
     def test_api_identity_uses_canonical_client_and_version(self) -> None:
         self.assertEqual(UPLOAD_CLIENT_ID, "supersplat-lichtfeld-plugin")

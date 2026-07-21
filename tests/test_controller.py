@@ -5,9 +5,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from lfs_supersplat.controller import PluginController
-from lfs_supersplat.models import JobStatus, UploadJob, UploadOutcome, utc_now
-from lfs_supersplat.storage import JobStore
+from supersplat.controller import PluginController
+from supersplat.models import JobStatus, UploadJob, UploadOutcome, utc_now
+from supersplat.storage import JobStore
 
 
 class _Settings:
@@ -94,7 +94,7 @@ class PluginControllerCleanupTests(unittest.TestCase):
                 viewer_url="https://viewer.test/splat-1", splat={},
             )
 
-            with patch("lfs_supersplat.controller.UploadEngine") as engine_type:
+            with patch("supersplat.controller.UploadEngine") as engine_type:
                 engine_type.return_value.upload.return_value = outcome
                 controller._start_upload_worker()
                 controller._worker.join(timeout=2)  # type: ignore[union-attr]

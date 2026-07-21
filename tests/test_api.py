@@ -9,8 +9,8 @@ from email.utils import format_datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from lfs_supersplat.api import ApiClient
-from lfs_supersplat.errors import ApiError, PartUploadError, ProtocolError
+from supersplat.api import ApiClient
+from supersplat.errors import ApiError, PartUploadError, ProtocolError
 
 
 class _ServerState:

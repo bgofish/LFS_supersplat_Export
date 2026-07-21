@@ -5,13 +5,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from lfs_supersplat.models import (
+from supersplat.models import (
     UPLOAD_JOB_SCHEMA_VERSION,
     JobStatus,
     UploadJob,
     utc_now,
 )
-from lfs_supersplat.storage import JobStore
+from supersplat.storage import JobStore
 
 
 class JobStoreTests(unittest.TestCase):

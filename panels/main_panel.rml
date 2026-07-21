@@ -2,12 +2,12 @@
 <head>
   <link type="text/rcss" href="main_panel.rcss"/>
 </head>
-<body class="ss-panel" data-model="supersplat_upload">
+<body class="ss-panel" data-model="supersplat">
   <div class="ss-topbar">
     <div class="ss-topbar-brand">
       <img class="ss-topbar-logo" src="supersplat-logo.tga" alt="SuperSplat" />
       <div class="ss-topbar-copy">
-        <span class="ss-topbar-title">SuperSplat Upload</span>
+        <span class="ss-topbar-title">SuperSplat</span>
         <span class="ss-topbar-subtitle">by PlayCanvas</span>
       </div>
     </div>

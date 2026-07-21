@@ -8,10 +8,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from unittest.mock import patch
 
-from lfs_supersplat.errors import ApiError, ProtocolError
-from lfs_supersplat.models import JobStatus, UploadJob, UploadedPart, utc_now
-from lfs_supersplat.package_info import PLUGIN_VERSION, UPLOAD_CLIENT_ID, USER_AGENT
-from lfs_supersplat.uploader import UploadCallbacks, UploadEngine, merge_parts, part_size_for
+from supersplat.errors import ApiError, ProtocolError
+from supersplat.models import JobStatus, UploadJob, UploadedPart, utc_now
+from supersplat.package_info import PLUGIN_VERSION, UPLOAD_CLIENT_ID, USER_AGENT
+from supersplat.uploader import UploadCallbacks, UploadEngine, merge_parts, part_size_for
 
 
 _TIMESTAMP = "2099-01-01T00:00:00Z"

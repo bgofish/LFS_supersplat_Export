@@ -7,9 +7,9 @@ from pathlib import Path
 
 import lichtfeld as lf
 
-from ..lfs_supersplat.errors import SuperSplatError
-from ..lfs_supersplat.progress import format_bytes
-from ..lfs_supersplat.runtime import get_controller
+from ..supersplat.errors import SuperSplatError
+from ..supersplat.progress import format_bytes
+from ..supersplat.runtime import get_controller
 
 
 # TODO: Add a selected-splats scope once selection export can be made reliable.
@@ -24,7 +24,7 @@ def _xml_unescape(value) -> str:
 
 
 class SuperSplatPanel(lf.ui.Panel):
-    id = "lfs_supersplat.upload"
+    id = "supersplat.main"
     label = "SuperSplat"
     space = lf.ui.PanelSpace.MAIN_PANEL_TAB
     order = 210
@@ -70,7 +70,7 @@ class SuperSplatPanel(lf.ui.Panel):
     # -- Data model -----------------------------------------------------
 
     def on_bind_model(self, ctx) -> None:
-        model = ctx.create_data_model("supersplat_upload")
+        model = ctx.create_data_model("supersplat")
         if model is None:
             return
 
@@ -173,7 +173,7 @@ class SuperSplatPanel(lf.ui.Panel):
         self._last_scope = ""
 
     def on_unmount(self, doc) -> None:
-        doc.remove_data_model("supersplat_upload")
+        doc.remove_data_model("supersplat")
         self._handle = None
         self._doc = None
 
