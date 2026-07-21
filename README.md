@@ -21,7 +21,7 @@ See the [LichtFeld Studio integration guide](https://developer.playcanvas.com/us
 ## Requirements
 
 - LichtFeld Studio 0.5.3 or later.
-- A SuperSplat API key.
+- A PlayCanvas API key.
 - Python 3.10 or later, supplied by the LichtFeld Studio host.
 
 The plugin has no required third-party Python dependencies. Secure persistent credential storage uses the host `keyring` package when available, with Windows DPAPI as a fallback on Windows.
@@ -55,10 +55,19 @@ git clone https://github.com/playcanvas/supersplat-lichtfeld-plugin.git ~/.licht
 
 Restart LichtFeld Studio, then load **SuperSplat** from the Plugin Marketplace.
 
+## Getting a PlayCanvas API key
+
+1. Open your [PlayCanvas account](https://playcanvas.com/account).
+2. Under **API Tokens**, select **Generate Token** and give the token a name.
+3. Copy the token when it is displayed. It cannot be viewed again after the window is closed.
+4. Paste the token into the **PlayCanvas API key** field in the SuperSplat panel and select **Connect**.
+
+The PlayCanvas account page calls this credential an API token; the plugin uses that token as your PlayCanvas API key.
+
 ## Uploading a scene
 
 1. Open a scene containing at least one splat node.
-2. Open the **SuperSplat** tab and connect with your API key.
+2. Open the **SuperSplat** tab and connect with your PlayCanvas API key.
 3. Choose **All splats** or **Visible splats**.
 4. Add a title and optional description.
 5. If needed, open **Advanced** to choose the file format, SH degree, and number of parallel upload parts.
@@ -68,12 +77,12 @@ When the upload is accepted, the panel provides links to continue in SuperSplat 
 
 ## Credentials and local data
 
-You can paste an API key into the panel or set `SUPERSPLAT_API_KEY` before launching LichtFeld Studio. The storage checkbox asks the plugin to remember the key between sessions:
+Paste a PlayCanvas API key into the panel. The storage checkbox asks the plugin to remember the key between sessions:
 
 - With secure storage enabled, the plugin attempts to use `keyring`, then Windows DPAPI on Windows.
 - Without a secure credential backend, there is no plaintext fallback.
-- API keys are never written to plugin settings or upload manifests.
-- Signed storage requests never receive the SuperSplat API bearer credential.
+- PlayCanvas API keys are never written to plugin settings or upload manifests.
+- Signed storage requests never receive the PlayCanvas API key.
 
 Staged exports and one JSON checkpoint per upload are kept in a local cache so interrupted uploads can resume. Successful uploads remove both files.
 
@@ -86,7 +95,6 @@ The plugin also supports these environment and plugin settings:
 
 | Setting | Purpose |
 | --- | --- |
-| `SUPERSPLAT_API_KEY` | Supplies the API key at launch. |
 | `SUPERSPLAT_BASE_URL` | Overrides the default SuperSplat API base URL. |
 | `SUPERSPLAT_CACHE_DIR` | Moves staged exports and upload checkpoints. |
 | `base_url` plugin setting | Overrides the API base URL through LichtFeld's plugin settings. |

@@ -57,15 +57,9 @@ class PluginController:
         self._export_seen_active = False
         self._closed = False
         self._remember_token = bool(self.settings.get("remember_token", False))
-        self._token = os.environ.get("SUPERSPLAT_API_KEY", "").strip()
-        if not self._token and self._remember_token:
-            self._token = load_token()
+        self._token = load_token() if self._remember_token else ""
         if self._token:
-            self._state.token_source = (
-                "SUPERSPLAT_API_KEY"
-                if os.environ.get("SUPERSPLAT_API_KEY", "").strip()
-                else "secure credential store"
-            )
+            self._state.token_source = "secure credential store"
         self._update_token_mask()
         self.store.cleanup_completed()
         self._refresh_resume()
@@ -455,9 +449,7 @@ class PluginController:
         with self._lock:
             token = self._token
         if not token:
-            raise ConfigurationError(
-                "Paste a SuperSplat API key, or set SUPERSPLAT_API_KEY before launching LFS."
-            )
+            raise ConfigurationError("Paste a PlayCanvas API key first.")
         return token
 
     def _update_token_mask(self) -> None:

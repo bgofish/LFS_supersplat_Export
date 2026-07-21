@@ -146,7 +146,7 @@
     font-weight: bold;
 }
 
-.ss-api-help {
+.ss-account-link {
     padding: 2dp 0;
     font-size: 11dp;
 }
@@ -165,12 +165,6 @@
 .ss-api-key:focus {
     border-color: #68b2ff;
     background-color: #2f3032;
-}
-
-.ss-credential-note {
-    display: block;
-    margin-top: 4dp;
-    font-size: 10dp;
 }
 
 .ss-full, .ss-primary {

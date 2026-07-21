@@ -62,6 +62,26 @@ def _job(store: JobStore, job_id: str, status: JobStatus) -> tuple[UploadJob, Pa
     return job, staged
 
 
+class PluginControllerCredentialTests(unittest.TestCase):
+    def test_startup_loads_remembered_key_from_secure_store(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = JobStore(Path(directory))
+            lf = _Lfs()
+            lf.plugins.value.set("remember_token", True)
+            with patch(
+                "supersplat.controller.load_token", return_value="stored-token"
+            ) as load_token:
+                controller = PluginController(lf, _RuntimeState(), store)
+
+            try:
+                load_token.assert_called_once_with()
+                state = controller.snapshot()
+                self.assertTrue(state.token_configured)
+                self.assertEqual(state.token_source, "secure credential store")
+            finally:
+                controller.shutdown()
+
+
 class PluginControllerCleanupTests(unittest.TestCase):
     def test_startup_removes_completed_leftovers_and_preserves_failed_jobs(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

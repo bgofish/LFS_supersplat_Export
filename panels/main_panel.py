@@ -15,7 +15,7 @@ from ..supersplat.runtime import get_controller
 # TODO: Add a selected-splats scope once selection export can be made reliable.
 SCOPES = ("all", "visible")
 FORMATS = ("ply", "sog")
-API_KEY_HELP_URL = "https://developer.playcanvas.com/user-manual/supersplat/integrations/lichtfeld-studio/#connect-to-supersplat"
+PLAYCANVAS_ACCOUNT_URL = "https://playcanvas.com/account"
 PLUGIN_GITHUB_URL = "https://github.com/playcanvas/supersplat-lichtfeld-plugin"
 
 
@@ -121,7 +121,7 @@ class SuperSplatPanel(lf.ui.Panel):
             ("change_credentials", self._on_change_credentials),
             ("cancel_credentials", self._on_cancel_credentials),
             ("connect", self._on_connect),
-            ("open_api_key_help", self._on_open_api_key_help),
+            ("open_playcanvas_account", self._on_open_playcanvas_account),
             ("open_plugin_github", self._on_open_plugin_github),
             ("forget_key", self._on_forget_key),
             ("toggle_remember", self._on_toggle_remember),
@@ -252,9 +252,8 @@ class SuperSplatPanel(lf.ui.Panel):
     def _account_source() -> str:
         source = get_controller().snapshot().token_source
         return {
-            "SUPERSPLAT_API_KEY": "API key from environment",
             "secure credential store": "Stored securely",
-            "this LFS session": "API key for this session",
+            "this LFS session": "PlayCanvas API key for this session",
         }.get(source, source)
 
     def _can_upload(self) -> bool:
@@ -374,8 +373,8 @@ class SuperSplatPanel(lf.ui.Panel):
         self.api_key_entry = ""
         self._dirty_model()
 
-    def _on_open_api_key_help(self, _handle, _event, _args) -> None:
-        get_controller().open_url(API_KEY_HELP_URL)
+    def _on_open_playcanvas_account(self, _handle, _event, _args) -> None:
+        get_controller().open_url(PLAYCANVAS_ACCOUNT_URL)
 
     def _on_open_plugin_github(self, _handle, _event, _args) -> None:
         get_controller().open_url(PLUGIN_GITHUB_URL)

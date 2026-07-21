@@ -54,7 +54,7 @@ class PanelContractTests(unittest.TestCase):
 
         for event in (
             "connect",
-            "open_api_key_help",
+            "open_playcanvas_account",
             "open_plugin_github",
             "toggle_advanced",
             "start_upload",
@@ -89,7 +89,7 @@ class PanelContractTests(unittest.TestCase):
         self.assertIsNotNone(heading)
         self.assertEqual(
             heading.find("./span[@class='ss-credential-label']").text,
-            "API key",
+            "PlayCanvas API key",
         )
 
         rcss = RCSS_PATH.read_text(encoding="utf-8")
@@ -97,19 +97,27 @@ class PanelContractTests(unittest.TestCase):
         self.assertIn("width: auto;", rcss)
         self.assertIn(".ss-api-key:focus {", rcss)
 
-    def test_api_key_help_opens_the_integration_guide(self) -> None:
-        help_button = self.root.find(".//*[@data-event-click='open_api_key_help']")
-        self.assertIsNotNone(help_button)
-        self.assertEqual(help_button.text, "How to add an API key")
+    def test_account_link_opens_the_playcanvas_account(self) -> None:
+        account_button = self.root.find(
+            ".//*[@data-event-click='open_playcanvas_account']"
+        )
+        self.assertIsNotNone(account_button)
+        self.assertEqual(account_button.text, "Manage API keys")
+        api_key_input = self.root.find(".//*[@data-value='api_key_entry']")
+        self.assertIsNotNone(api_key_input)
+        self.assertEqual(
+            api_key_input.attrib.get("placeholder"), "Paste PlayCanvas API key"
+        )
         self.assertIn(
-            'API_KEY_HELP_URL = "https://developer.playcanvas.com/user-manual/supersplat/integrations/lichtfeld-studio/#connect-to-supersplat"',
+            'PLAYCANVAS_ACCOUNT_URL = "https://playcanvas.com/account"',
             self.panel,
         )
-        self.assertIn("get_controller().open_url(API_KEY_HELP_URL)", self.panel)
+        self.assertIn(
+            "get_controller().open_url(PLAYCANVAS_ACCOUNT_URL)", self.panel
+        )
 
     def test_remember_checkbox_uses_actual_state_and_ignores_duplicate_events(self) -> None:
         self.assertIn("Store securely with your operating system", self.rml)
-        self.assertIn("Your key is never included in upload manifests.", self.rml)
         self.assertNotIn("Remember securely", self.rml)
         self.assertNotIn(
             "self.remember_token = not self.remember_token",

@@ -31,11 +31,10 @@
     <div class="ss-card ss-credentials ss-credential-card" data-if="show_credentials">
       <span class="ss-card-title">Connect to SuperSplat</span>
       <div class="ss-credential-field-heading">
-        <span class="ss-credential-label">API key</span>
-        <button type="button" class="ss-link ss-api-help" data-event-click="open_api_key_help">How to add an API key</button>
+        <span class="ss-credential-label">PlayCanvas API key</span>
+        <button type="button" class="ss-link ss-account-link" data-event-click="open_playcanvas_account">Manage API keys</button>
       </div>
-      <input type="password" class="ss-api-key" placeholder="API key" data-value="api_key_entry" />
-      <span class="ss-muted ss-credential-note">Your key is never included in upload manifests.</span>
+      <input type="password" class="ss-api-key" placeholder="Paste PlayCanvas API key" data-value="api_key_entry" />
       <label class="ss-check-row">
         <input type="checkbox" data-attrif-checked="remember_token" data-event-change="toggle_remember" />
         <span>Store securely with your operating system</span>
