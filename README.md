@@ -2,8 +2,6 @@
 
 Upload Gaussian splat scenes from [LichtFeld Studio](https://lichtfeld.io/) directly to SuperSplat. The plugin uses LichtFeld's native exporter, stages a PLY or SOG file locally, and sends it to SuperSplat with progress reporting and resumable multipart uploads.
 
-See the [LichtFeld Studio integration guide](https://developer.playcanvas.com/user-manual/supersplat/integrations/lichtfeld-studio/) for the canonical installation and usage instructions.
-
 <p align="center">
   <img src="docs/images/supersplat-upload-panel.png" alt="SuperSplat panel in LichtFeld Studio" width="338">
 </p>
@@ -14,7 +12,6 @@ See the [LichtFeld Studio integration guide](https://developer.playcanvas.com/us
 - Export as PLY or SOG with a chosen spherical harmonics (SH) degree.
 - Follow export and upload progress without leaving LichtFeld Studio.
 - Resume an interrupted upload from its locally staged export.
-- Use up to eight parallel upload parts.
 - Continue straight to the SuperSplat editor or viewer after an upload.
 - New uploads are unlisted by default.
 
