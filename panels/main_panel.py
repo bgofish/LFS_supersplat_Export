@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import html
+import subprocess
+import sys
 from pathlib import Path
 
 import lichtfeld as lf
 
+from ..supersplat.camera_path import CameraPathExporter, LOOP_MODES
 from ..supersplat.errors import SuperSplatError
 from ..supersplat.progress import format_bytes
 from ..supersplat.runtime import get_controller
@@ -15,12 +18,62 @@ from ..supersplat.runtime import get_controller
 # TODO: Add a selected-splats scope once selection export can be made reliable.
 SCOPES = ("all", "visible")
 FORMATS = ("ply", "sog")
+CP_LOOP_LABELS = ("repeat", "once", "pingpong")  # UI labels; LOOP_MODES has the JSON values
 PLAYCANVAS_ACCOUNT_URL = "https://playcanvas.com/account"
 PLUGIN_GITHUB_URL = "https://github.com/playcanvas/supersplat-lichtfeld-plugin"
+
+_SUBPROCESS_FLAGS = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 
 def _xml_unescape(value) -> str:
     return html.unescape(str(value or ""))
+
+
+def _open_dialog(title: str, file_filter: str):
+    if sys.platform != "win32":
+        return None
+    ps_script = f'''
+    Add-Type -AssemblyName System.Windows.Forms
+    $d = New-Object System.Windows.Forms.OpenFileDialog
+    $d.Title = "{title}"
+    $d.Filter = "{file_filter}"
+    if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {{
+        Write-Output $d.FileName
+    }}
+    '''
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            capture_output=True, text=True, creationflags=_SUBPROCESS_FLAGS,
+        )
+        path = result.stdout.strip()
+        return path if path else None
+    except Exception:
+        return None
+
+
+def _save_dialog(title: str, file_filter: str, default_name: str = ""):
+    if sys.platform != "win32":
+        return None
+    ps_script = f'''
+    Add-Type -AssemblyName System.Windows.Forms
+    $d = New-Object System.Windows.Forms.SaveFileDialog
+    $d.Title = "{title}"
+    $d.Filter = "{file_filter}"
+    $d.FileName = "{default_name}"
+    if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {{
+        Write-Output $d.FileName
+    }}
+    '''
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            capture_output=True, text=True, creationflags=_SUBPROCESS_FLAGS,
+        )
+        path = result.stdout.strip()
+        return path if path else None
+    except Exception:
+        return None
 
 
 class SuperSplatPanel(lf.ui.Panel):
@@ -65,6 +118,17 @@ class SuperSplatPanel(lf.ui.Panel):
         self._dismissed_splat_id = ""
         self._handle = None
         self._doc = None
+
+        self._cp_exporter = CameraPathExporter(lf)
+        self._cp_json_path = ""
+        self._cp_sequencer_data = None
+        self._cp_sequencer_kf_count = 0
+        self._cp_loop_idx = 0
+        self._cp_smoothness = "0.5"
+        self._cp_fps = "30"
+        self._cp_status = ""
+        self._cp_last_output = ""
+
         self._refresh_selection(force=True)
 
     # -- Data model -----------------------------------------------------
@@ -117,6 +181,31 @@ class SuperSplatPanel(lf.ui.Panel):
         model.bind_func("has_edit_url", lambda: bool(get_controller().snapshot().edit_url))
         model.bind_func("has_viewer_url", lambda: bool(get_controller().snapshot().viewer_url))
 
+        model.bind(
+            "cp_loop_idx",
+            lambda: str(self._cp_loop_idx),
+            self._set_cp_loop_idx,
+        )
+        model.bind(
+            "cp_smoothness",
+            lambda: self._cp_smoothness,
+            self._set_cp_smoothness,
+        )
+        model.bind(
+            "cp_fps",
+            lambda: self._cp_fps,
+            self._set_cp_fps,
+        )
+        model.bind_func("cp_has_source", self._cp_has_source)
+        model.bind_func("cp_source_label", self._cp_source_label)
+        model.bind_func("cp_can_export", self._cp_has_source)
+        model.bind_func("cp_has_status", lambda: bool(self._cp_status))
+        model.bind_func("cp_status_text", lambda: self._cp_status)
+        model.bind_func("cp_status_ok", lambda: "exported" in self._cp_status.lower())
+        model.bind_func("cp_status_error", lambda: any(
+            w in self._cp_status.lower() for w in ("failed", "error")
+        ))
+
         for name, handler in (
             ("change_credentials", self._on_change_credentials),
             ("cancel_credentials", self._on_cancel_credentials),
@@ -134,6 +223,9 @@ class SuperSplatPanel(lf.ui.Panel):
             ("open_viewer", self._on_open_viewer),
             ("copy_link", self._on_copy_link),
             ("upload_another", self._on_upload_another),
+            ("cp_browse_file", self._on_cp_browse_file),
+            ("cp_load_sequencer", self._on_cp_load_sequencer),
+            ("cp_export", self._on_cp_export),
         ):
             model.bind_event(name, handler)
 
@@ -218,6 +310,23 @@ class SuperSplatPanel(lf.ui.Panel):
         self.api_key_entry = _xml_unescape(value)
         self._dirty_model("can_connect")
 
+    def _set_cp_loop_idx(self, value) -> None:
+        try:
+            idx = max(0, min(int(float(value)), len(LOOP_MODES) - 1))
+        except (TypeError, ValueError):
+            return
+        self._cp_loop_idx = idx
+
+    def _set_cp_smoothness(self, value) -> None:
+        try:
+            v = max(0.0, min(1.0, float(value)))
+        except (TypeError, ValueError):
+            return
+        self._cp_smoothness = f"{v:.3g}"
+
+    def _set_cp_fps(self, value) -> None:
+        self._cp_fps = str(value).strip()
+
     # -- View helpers ---------------------------------------------------
 
     def _show_form(self) -> bool:
@@ -298,6 +407,16 @@ class SuperSplatPanel(lf.ui.Panel):
 
     def _success_title(self) -> str:
         return self.title.strip() or "LichtFeld scene"
+
+    def _cp_has_source(self) -> bool:
+        return bool(self._cp_json_path) or bool(self._cp_sequencer_data)
+
+    def _cp_source_label(self) -> str:
+        if self._cp_sequencer_data is not None:
+            return f"From sequencer ({self._cp_sequencer_kf_count} keyframes)"
+        if self._cp_json_path:
+            return Path(self._cp_json_path).name
+        return "No camera path selected"
 
     def _refresh_selection(self, *, force: bool = False) -> bool:
         if not force and self.scope == self._last_scope:
@@ -449,6 +568,64 @@ class SuperSplatPanel(lf.ui.Panel):
         self._dismissed_splat_id = get_controller().snapshot().splat_id
         self._refresh_selection(force=True)
         self._dirty_model()
+
+    def _on_cp_browse_file(self, _handle, _event, _args) -> None:
+        path = _open_dialog("Select camera_path.json", "JSON files (*.json)|*.json")
+        if path:
+            self._cp_json_path = path
+            self._cp_sequencer_data = None
+            self._cp_sequencer_kf_count = 0
+            self._cp_status = ""
+        self._dirty_model(
+            "cp_source_label", "cp_has_source", "cp_can_export",
+            "cp_has_status", "cp_status_text", "cp_status_ok", "cp_status_error",
+        )
+
+    def _on_cp_load_sequencer(self, _handle, _event, _args) -> None:
+        try:
+            data = self._cp_exporter.read_from_sequencer()
+            kfs = data.get("keyframes", [])
+            if not kfs:
+                self._cp_status = "Sequencer has no keyframes to load."
+            else:
+                self._cp_sequencer_data = data
+                self._cp_sequencer_kf_count = len(kfs)
+                self._cp_json_path = ""
+                self._cp_status = f"Loaded {len(kfs)} keyframes from sequencer."
+        except Exception as error:
+            lf.log.error(f"SuperSplat camera path: {error}")
+            self._cp_status = f"Failed to read sequencer: {error}"
+        self._dirty_model(
+            "cp_source_label", "cp_has_source", "cp_can_export",
+            "cp_has_status", "cp_status_text", "cp_status_ok", "cp_status_error",
+        )
+
+    def _on_cp_export(self, _handle, _event, _args) -> None:
+        if not self._cp_has_source():
+            self._cp_status = "Select a camera path first."
+            self._dirty_model("cp_has_status", "cp_status_text", "cp_status_ok", "cp_status_error")
+            return
+        try:
+            camera_path = self._cp_sequencer_data or self._cp_exporter.read_from_file(self._cp_json_path)
+            fps = float(self._cp_fps) if self._cp_fps else 30.0
+            smoothness = float(self._cp_smoothness) if self._cp_smoothness else 0.5
+            name = self.title.strip() or "camera_path"
+            data = self._cp_exporter.build_json(
+                camera_path, name=name, loop_mode=LOOP_MODES[self._cp_loop_idx],
+                smoothness=smoothness, fps=fps,
+            )
+            default_name = f"{name}_camera_path.json"
+            out_path = _save_dialog("Export SuperSplat Animation JSON", "JSON files (*.json)|*.json", default_name)
+            if not out_path:
+                return  # cancelled
+            self._cp_exporter.save_json(out_path, data)
+            self._cp_last_output = out_path
+            n_kf = len(data["animTracks"][0]["keyframes"]["times"])
+            self._cp_status = f"Exported {Path(out_path).name} ({n_kf} keyframes)"
+        except Exception as error:
+            lf.log.error(f"SuperSplat camera path export: {error}")
+            self._cp_status = f"Export failed: {error}"
+        self._dirty_model("cp_has_status", "cp_status_text", "cp_status_ok", "cp_status_error")
 
     def _dirty_model(self, *fields: str) -> None:
         if not self._handle:

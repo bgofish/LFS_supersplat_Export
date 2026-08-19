@@ -295,6 +295,14 @@
     color: #ff7575;
 }
 
+.ss-cp-status-ok {
+    color: #57d69a;
+}
+
+.ss-cp-status-error {
+    color: #ff7575;
+}
+
 .ss-form-error {
     display: block;
     margin: 10dp 0 6dp 0;

@@ -155,6 +155,38 @@
         <button type="button" class="ss-link" data-event-click="upload_another">Upload another scene</button>
       </div>
     </div>
+
+    <div class="ss-section ss-cp-section">
+      <span class="ss-eyebrow">Camera Path Export</span>
+      <div class="ss-field-row">
+        <span class="ss-label">Source</span>
+        <span class="ss-grow ss-muted ss-small">{{cp_source_label}}</span>
+      </div>
+      <div class="ss-button-row">
+        <button type="button" class="btn btn--secondary ss-grow" data-event-click="cp_browse_file">Browse File&#8230;</button>
+        <button type="button" class="btn btn--secondary ss-grow" data-event-click="cp_load_sequencer">Load from Sequencer</button>
+      </div>
+      <div class="ss-field-row">
+        <span class="ss-label">Loop Mode</span>
+        <select class="ss-grow" data-value="cp_loop_idx">
+          <option value="0">repeat</option>
+          <option value="1">once</option>
+          <option value="2">pingpong</option>
+        </select>
+      </div>
+      <div class="ss-field-row">
+        <span class="ss-label">Smoothness</span>
+        <input class="ss-grow" type="text" data-value="cp_smoothness" />
+      </div>
+      <div class="ss-field-row">
+        <span class="ss-label">Export FPS</span>
+        <input class="ss-grow" type="text" data-value="cp_fps" />
+      </div>
+      <span class="ss-small" data-if="cp_has_status"
+            data-class-ss-cp-status-ok="cp_status_ok"
+            data-class-ss-cp-status-error="cp_status_error">{{cp_status_text}}</span>
+      <button type="button" class="btn btn--primary ss-primary" data-event-click="cp_export" data-attrif-disabled="!cp_can_export">Export SuperSplat Animation JSON</button>
+    </div>
   </div>
 </body>
 </rml>
